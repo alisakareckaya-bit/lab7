@@ -25,7 +25,7 @@ public class ConnectModule {
             this.sendingManagerServer = sendingManager;
             channel = DatagramChannel.open();
             channel.bind(new InetSocketAddress(port));
-            channel.configureBlocking(false);
+            channel.configureBlocking(true);
         }
 
         public void run() {
