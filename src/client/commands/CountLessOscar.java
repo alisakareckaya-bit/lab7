@@ -7,7 +7,7 @@ import common.CommandPacket;
 public class CountLessOscar implements Comand {
 
     @Override
-    public CommandPacket implementCommand(String[] args) {
+    public CommandPacket implementCommand(String[] args, String login, String pw) {
             if (args == null || args.length == 0) {
                 Client.inout.write("Не указано значение oscarsCount.\n");
                 return null;
@@ -25,7 +25,7 @@ public class CountLessOscar implements Comand {
                 return null;
             }
             String[] sendArgs = {String.valueOf(targetOscarsCount)};
-            return new CommandPacket("count_oscar", sendArgs, null);
+            return new CommandPacket("count_oscar", sendArgs, null, login, pw);
         }
 
 

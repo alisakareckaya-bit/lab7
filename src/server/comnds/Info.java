@@ -15,7 +15,6 @@ public class Info implements Comands {
                 + "Время создания коллекции: " + Server.getCollectionManager().getTime();
         return new ResponsPacket("Информация о коллекции", text);
     }
-
     @Override
     public String toString() {
         return "info: выводит информацию о коллекции (тип, дата инициализации, количество элементов)";

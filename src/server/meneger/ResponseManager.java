@@ -8,14 +8,11 @@ import common.manager.ChunkManager;
 import java.util.*;
 
 public class ResponseManager {
-    private final ParseManagerServer parserManager;  // ← только parserManager
+    private final ParseManagerServer parserManager;
 
     private final Map<Integer, Map<Integer, ChunkManager.Chunk>> pendingRequests = new HashMap<>();
     private final Map<Integer, Long> requestTimestamps = new HashMap<>();
 
-    private static final int TIMEOUT_MS = 5000;
-    private static final int CLEANUP_INTERVAL = 10;
-    private int callCounter = 0;
 
     public ResponseManager(ParseManagerServer parserManager) {  // ← только один параметр
         this.parserManager = parserManager;
@@ -51,23 +48,4 @@ public class ResponseManager {
         return parserManager.parseCommand(command);
     }
 
-    public void cleanupOldRequests() {
-        callCounter++;
-        if (callCounter % CLEANUP_INTERVAL != 0) return;
-
-        long now = System.currentTimeMillis();
-
-        // Исправлено: собираем ключи в список
-        List<Integer> expiredKeys = new ArrayList<>();
-        for (Map.Entry<Integer, Long> entry : requestTimestamps.entrySet()) {
-            if (now - entry.getValue() > TIMEOUT_MS) {
-                expiredKeys.add(entry.getKey());
-            }
-        }
-
-        for (int key : expiredKeys) {
-            pendingRequests.remove(key);
-            requestTimestamps.remove(key);
-        }
-    }
 }

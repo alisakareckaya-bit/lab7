@@ -31,12 +31,29 @@ public class ParseManagerServer {
         commands.put("remove_palm", new RemoveGoldenPalm());
         commands.put("execute", new Execute());
         commands.put("clear", new Clear());
+        commands.put("login", new Login());
+        commands.put("registration", new Registration());
     }
     public ResponsPacket parseCommand(CommandPacket comPac){
+        String command_name = comPac.getType().toLowerCase().trim();
         if (comPac == null || comPac.getType() == null) {
             return new ResponsPacket("Ошибка: Сервер получил пустой пакет команды", null);
         }
-        String command_name = comPac.getType().toLowerCase().trim();
+        // 2. ПОТОМ проверяем и создаем таблицы
+        if (!DatabaseManager.getInstance().checkAndCreateTables()) {
+            Server.logger.error("Не удалось проверить/создать таблицы");
+            return new ResponsPacket("Ошибка инициализации базы данных", null);
+        }
+        if (!command_name.equals("login") && !command_name.equals("registration")){
+            if (!DatabaseManager.getInstance().repeatConnect()) {
+                return new ResponsPacket("База данных не доступна", null);
+            }
+            if (!DatabaseManager.getInstance().checkUserPassword(comPac.getLog(),comPac.getPassword())){
+                Server.logger.error("Пароль не совпал с необходимым");
+                return new ResponsPacket("Пароль не совпадает с необходимым", 9000);
+            }
+        }
+
 
         if (this.commands.containsKey(command_name)) {
             Comands command = this.commands.get(command_name);

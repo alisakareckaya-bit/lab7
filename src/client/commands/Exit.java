@@ -5,7 +5,7 @@ import common.CommandPacket;
 
 public class Exit implements Comand {
     @Override
-    public CommandPacket implementCommand(String[] args){
+    public CommandPacket implementCommand(String[] args, String login, String pw){
         System.exit(0);
         return null;
     }

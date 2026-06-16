@@ -8,7 +8,7 @@ import common.CommandPacket;
 public class Execute implements Comand {
     private String filename;
     @Override
-    public CommandPacket implementCommand(String[] args) {
+    public CommandPacket implementCommand(String[] args, String login, String pw) {
         if (args.length == 0) {
             Client.inout.write("Введите название файла, из которого хотите читать скрипт:\n");
             filename = CheckValue.checkValuesNull("название файла, из которого хотите читать скрипт");
@@ -33,7 +33,7 @@ public class Execute implements Comand {
                 continue;
             }
 
-            Client.run(Client.parser.parse(command));
+            Client.run(Client.parser.parse(command, login, pw));
 
             if (Client.inout.isScriptHasError()) {
                 Client.inout.write("В файле была совершена ошибка ввода данных.\n");
@@ -47,7 +47,7 @@ public class Execute implements Comand {
         if (!hadError) {
             Client.inout.setScriptError(false);
         }
-        return new CommandPacket("execute", null, null);
+        return new CommandPacket("execute", null, null, login,pw);
     }
 
     @Override

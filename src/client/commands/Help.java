@@ -6,13 +6,8 @@ import common.CommandPacket;
 
 public class Help implements Comand {
     @Override
-    public CommandPacket implementCommand(String[] args) {
-        Client.inout.write("Доступные команды приложения:");
-        for (String cmd : Client.parser.getCommands().keySet()) {
-            Client.inout.write(cmd + ": " + Client.parser.getCommands().get(cmd).toString());
-
-        }
-        return null;
+    public CommandPacket implementCommand(String[] args, String login, String pw) {
+        return new CommandPacket("help", null, null, login, pw);
     }
     @Override
     public String toString() {

@@ -7,25 +7,23 @@ import server.Server;
 import server.interfcs.Comands;
 
 import java.util.Collections;
-import java.util.Stack;
+import java.util.List;
 
 public class Reorder implements Comands {
 
     @Override
     public ResponsPacket executer(CommandPacket commandPacket) {
-        try {
-            Stack<Movie> collection = Server.getCollectionManager().getMovie();
-            if (collection == null || collection.isEmpty()) {
+        List<Movie> movie = Server.getCollectionManager().getMovie();
+        synchronized (movie) {
+            if (movie == null || movie.isEmpty()) {
                 return new ResponsPacket("Коллекция пуста. Нечего сортировать.\n", null);
             }
-            Collections.reverse(collection);
-            return new ResponsPacket("Порядок элементов в коллекции изменен на обратный.\n", null);
-        } catch (Exception e) {
-            return new ResponsPacket("Ошибка при сортировке коллекции: " + e.getMessage() + "\n", null);
+            Collections.reverse(movie);
         }
+        return new ResponsPacket("Порядок элементов в коллекции изменен на обратный.\n", null);
     }
     @Override
     public String toString() {
-        return "Отсортировывает коллекцию в порядке, обратном нынешнему";
+        return "reorder: Отсортировывает коллекцию в порядке, обратном нынешнему";
     }
 }

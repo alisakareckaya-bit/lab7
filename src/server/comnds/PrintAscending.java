@@ -11,13 +11,15 @@ import java.util.*;
 public class PrintAscending implements Comands {
     @Override
     public ResponsPacket executer(CommandPacket commandPacket) {
-            Stack<Movie> movieStack = Server.getCollectionManager().getMovie();
-
-            if (movieStack == null || movieStack.isEmpty()) {
-                return new ResponsPacket("Коллекция пуста. Нечего выводить.\n", null);
+            List<Movie> movieStack = Server.getCollectionManager().getMovie();
+            List<Movie> sortedList;
+            synchronized (movieStack) {
+                if (movieStack == null || movieStack.isEmpty()) {
+                    return new ResponsPacket("Коллекция пуста. Нечего выводить.\n", null);
+                }
+                sortedList = new ArrayList<>(movieStack);
             }
 
-            List<Movie> sortedList = new ArrayList<>(movieStack);
             sortedList.sort(Comparator.comparing(Movie::getLength));
             StringBuilder result = new StringBuilder();
 
@@ -31,6 +33,6 @@ public class PrintAscending implements Comands {
 
     @Override
     public String toString() {
-        return "Вывести элементы коллекции в порядке возрастания";
+        return "print_ascending: Вывести элементы коллекции в порядке возрастания";
     }
 }

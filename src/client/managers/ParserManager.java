@@ -53,13 +53,13 @@ public class ParserManager {
      * @return {@code true}, если команда найдена и выполнена;
      *         {@code false}, если команда не существует или в процессе её выполнения возникла ошибка
      */
-    public CommandPacket parse(String line) {
+    public CommandPacket parse(String line, String login, String pw) {
         String[] command = line.trim().replaceAll("\\s++", " ").split(" ");
 
         if (commands.containsKey(command[0])) {
             Comand com = commands.get(command[0]);
             try {
-                return com.implementCommand(Arrays.copyOfRange(command, 1, command.length));
+                return com.implementCommand(Arrays.copyOfRange(command, 1, command.length), login, pw);
             } catch (Exception e) {
                 Client.inout.write("Ошибка при формировании команды\n");
                 return null;

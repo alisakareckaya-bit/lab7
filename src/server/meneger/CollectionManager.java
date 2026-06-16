@@ -15,7 +15,7 @@ import java.util.*;
 public class CollectionManager {
 
     /** Основная коллекция для хранения объектов фильмов */
-    private Stack<Movie> Movie;
+    private List<Movie> Movie;
 
     /** Время инициализации менеджера (создания коллекции) */
     private Date time;
@@ -25,7 +25,7 @@ public class CollectionManager {
      * Инициализирует пустой стек фильмов и устанавливает текущую дату как время создания.
      */
     public CollectionManager() {
-        Movie = new Stack<>();
+        Movie = Collections.synchronizedList(new Stack<>());
         time = new Date();
     }
 
@@ -35,7 +35,7 @@ public class CollectionManager {
      * @param movie объект фильма для добавления
      */
     public void add(Movie movie) {
-        Movie.push(movie);
+        Movie.add(movie);
     }
 
     /**
@@ -50,7 +50,7 @@ public class CollectionManager {
      *
      * @return объект {@link Stack}, содержащий все фильмы
      */
-    public Stack<Movie> getMovie() {
+    public List<Movie> getMovie() {
         return Movie;
     }
 
@@ -72,22 +72,18 @@ public class CollectionManager {
     public boolean removeById(long id) {
         return Movie.removeIf(movie -> movie.getId() == id);
     }
-
-    /**
-     * Сортирует коллекцию с использованием заданного компаратора.
-     *
-     * @param compartor объект, определяющий логику сравнения элементов {@link Movie}
-     */
-    public void sort(Comparator<Movie> compartor) {
-        Movie.sort(compartor);
-    }
     /**
      * Сортирует коллекцию по длине фильма (естественный порядок).
      */
     public void sortByLength() {
-        List<Movie> list = new ArrayList<>(Movie);
-        list.sort((m1, m2) -> m1.getLength().compareTo(m2.getLength()));
-        Movie.clear();
-        Movie.addAll(list);
+        synchronized (Movie) {
+            List<Movie> list = new ArrayList<>(Movie);
+            list.sort((m1, m2) -> m1.getLength().compareTo(m2.getLength()));
+            Movie.clear();
+            Movie.addAll(list);
+        }
+    }
+    public void setMovie(Stack<Movie> Movie) {
+        this.Movie = Collections.synchronizedList(Movie);
     }
 }

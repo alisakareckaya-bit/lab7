@@ -14,7 +14,7 @@ public class Update implements Comand {
     private String keyStr;
 
     @Override
-    public CommandPacket implementCommand(String[] args) {
+    public CommandPacket implementCommand(String[] args, String login, String pw) {
         if (args.length == 0) {
             Client.inout.write("Введите ID элемента для обновления:\n");
             keyStr = CheckValue.checkValuesNull("id объекта, который хотите обновить:");
@@ -29,7 +29,7 @@ public class Update implements Comand {
             Integer.parseInt(keyStr);
             String[] id = new String[]{keyStr};
             Movie movie = new Movie();
-            return new CommandPacket("update", id, movie);
+            return new CommandPacket("update", id, movie, login, pw);
         } catch (NumberFormatException e) {
             Client.inout.write("id является типом int");
             return null;

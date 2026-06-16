@@ -15,18 +15,18 @@ public class Sort implements Comands {
     @Override
     public ResponsPacket executer(CommandPacket commandPacket) {
         List<Movie> movies = Server.getCollectionManager().getMovie();
+        synchronized (movies){
+            if (movies.isEmpty()){
+                return new ResponsPacket("Коллекция пуста. Нечего сортировать.", null);
+            }
+            movies.sort(Comparator.comparing(Movie::getLength));
+        }
 
-        List<Movie> list = new ArrayList<>(movies);
-
-        list.sort(Comparator.comparing(Movie::getLength));
-
-        movies.clear();
-        movies.addAll(list);
         return new ResponsPacket("Коллекция отсортирована в естественном порядке.", null);
     }
 
     @Override
     public String toString() {
-        return "Сортирует коллекцию в естественном порядке";
+        return "sort: Сортирует коллекцию в естественном порядке";
     }
 }

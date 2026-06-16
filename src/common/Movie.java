@@ -34,6 +34,7 @@ public class Movie implements Comparable<Movie>, Serializable {
 
     /** Оператор фильма. Может быть null. */
     private Person operator;
+    private String login;
 
     /**
      * Конструктор для интерактивного создания объекта.
@@ -65,7 +66,7 @@ public class Movie implements Comparable<Movie>, Serializable {
      * @param operator оператор
      */
     public Movie(Integer id, String name, Coordinates coordinates, LocalDate creationDate,
-                 long oscarsCount, int goldenPalmCount, Long length, MovieGenre genre, Person operator) {
+                 long oscarsCount, int goldenPalmCount, Long length, MovieGenre genre, Person operator, String login) {
         this.id = id;
         this.name = name;
         this.coordinates = coordinates;
@@ -75,6 +76,7 @@ public class Movie implements Comparable<Movie>, Serializable {
         this.length = length;
         this.genre = genre;
         this.operator = operator;
+        this.login = login;
     }
 
     /**
@@ -171,6 +173,9 @@ public class Movie implements Comparable<Movie>, Serializable {
         }
         this.length = len;
     }
+    public void setLogin(String login) {
+        this.login = login;
+    }
 
     public LocalDate getCreationDate() { return creationDate; }
     public Integer getId() { return id; }
@@ -198,7 +203,9 @@ public class Movie implements Comparable<Movie>, Serializable {
                 + "жанр: " + genre + ", "
                 + (operator != null ? operator.toString() : "оператор: null") + ", ";
     }
-
+    public String getLogin() {
+        return login;
+    }
     /**
      * Сравнивает текущий фильм с другим.
      * Порядок сравнения: длина названия, координаты, Оскары, Золотые Пальмы, длина фильма, оператор.

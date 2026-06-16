@@ -8,9 +8,9 @@ public class PrintAscending implements Comand {
 
 
     @Override
-    public CommandPacket implementCommand(String[] args) {
+    public CommandPacket implementCommand(String[] args, String login, String pw) {
 
-        return new CommandPacket("print_ascending", null, null);
+        return new CommandPacket("print_ascending", null, null, login, pw);
     }
 
     @Override

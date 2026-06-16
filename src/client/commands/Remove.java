@@ -11,7 +11,7 @@ public class Remove implements Comand {
     private String idStr;
 
     @Override
-    public CommandPacket implementCommand(String[] arg) {
+    public CommandPacket implementCommand(String[] arg, String login, String pw) {
         if (arg.length == 0) {
             Client.inout.write("Введите id объекта, который хотите удалить:\n");
             idStr = CheckValue.checkValuesNull("id объекта, который хотите удалить,");
@@ -25,7 +25,7 @@ public class Remove implements Comand {
         try {
             int id = Integer.parseInt(idStr);
             String[] ids = {idStr};
-            return new CommandPacket("remove", ids, null);
+            return new CommandPacket("remove", ids, null, login, pw);
 
         } catch (NumberFormatException e) {
             Client.inout.write("id не является типам int");

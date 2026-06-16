@@ -6,8 +6,8 @@ import common.CommandPacket;
 public class Sort implements Comand {
 
     @Override
-    public CommandPacket implementCommand(String[] args) {
-        return new CommandPacket("sort", null, null);
+    public CommandPacket implementCommand(String[] args, String login, String pw) {
+        return new CommandPacket("sort", null, null, login, pw);
     }
 
     @Override

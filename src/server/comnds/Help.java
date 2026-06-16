@@ -6,14 +6,16 @@ import server.Server;
 import server.interfcs.Comands;
 
 public class Help implements Comands {
+    String text;
     @Override
     public ResponsPacket executer(CommandPacket command) {
-        StringBuilder text = new StringBuilder();
-        for (Comands cmd : Server.parseManagerServer.getCommands().values()) {
-            text.append(cmd.toString()).append("\n");
+        text = "";
+        for (Comands i : Server.parseManagerServer.getCommands().values()) {
+            if(i.getClass()!= Login.class && i.getClass()!= Registration.class){
+                text = text + i.toString() + "\n";
+            }
         }
-
-        return new ResponsPacket(text.toString(), null);
+        return new ResponsPacket(text, null);
     }
     @Override
     public String toString() {

@@ -9,9 +9,14 @@ public class Clear implements Comands {
 
     @Override
     public ResponsPacket executer(CommandPacket command) {
-            Server.getCollectionManager().clear();
-        Server.logger.warn("Пользователь запросил полную очистку коллекции.");
-            return new ResponsPacket("Коллекция очищена.", null);
+        try{
+            String author = command.getLog();
+            Server.dbman.clearDB(author);
+            Server.getCollectionManager().setMovie(Server.dbman.getDB());
+            return new ResponsPacket("Все ваши элементы были удалены из коллекции", null);
+        } catch (Exception e) {
+            return new ResponsPacket("Ошибка при отчистке коллекции", null);
+        }
         }
         @Override
         public String toString(){

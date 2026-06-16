@@ -10,7 +10,6 @@ public class Execute implements Comands {
     public ResponsPacket executer(CommandPacket commandPacket) {
         return new ResponsPacket("Было выполнено чтение из скрипта.",null);
     }
-
     @Override
-    public String toString(){return "Выполняет скрипт из указанного вами файла.";}
+    public String toString(){return "execute: Выполняет скрипт из указанного вами файла.";}
 }

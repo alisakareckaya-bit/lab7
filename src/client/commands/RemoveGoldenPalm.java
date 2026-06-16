@@ -8,7 +8,7 @@ import common.CommandPacket;
 public class RemoveGoldenPalm implements Comand {
 
     @Override
-    public CommandPacket implementCommand(String[] args) {
+    public CommandPacket implementCommand(String[] args, String login, String pw) {
         if (args == null || args.length == 0) {
             Client.inout.write("Не указано значение goldenPalmCount.\n");
             return null;
@@ -26,7 +26,7 @@ public class RemoveGoldenPalm implements Comand {
             return null;
         }
         String[] sendArgs = {String.valueOf(targetGoldenPalmCount)};
-        return new CommandPacket("remove_palm", sendArgs, null);
+        return new CommandPacket("remove_palm", sendArgs, null, login, pw);
     }
 
 

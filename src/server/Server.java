@@ -22,7 +22,7 @@ public class Server {
         private static ResponseManager responseManager;
         private static SendingManagerServer sendingManager;
         private static ConnectModule connectModule;
-        private static FileManager fileManager = new FileManager();
+    public static DatabaseManager dbman = DatabaseManager.getInstance();
 
         public static void main(String[] args) {
             parseArgs(args);
@@ -31,8 +31,12 @@ public class Server {
             parseManagerServer = new ParseManagerServer(collectionManager);
             responseManager = new ResponseManager(parseManagerServer);
             sendingManager = new SendingManagerServer();
+/**
+ * Загружает все фильмы из БД в коллекцию при запуске сервера.
+ */
+            Stack<Movie> movie = dbman.getDB();
+            collectionManager.setMovie(movie);
 
-            loadCollection();
             try {
                 connectModule = new ConnectModule(port, responseManager, sendingManager);
             } catch (IOException e) {
@@ -60,33 +64,6 @@ public class Server {
             logger.info("Порт: " + port + ", файл: " + filename);
         }
 
-        private static void loadCollection() {
-            fileManager.readCSV(filename);
-
-            int maxId = collectionManager.getMovie().stream()
-                    .filter(Objects::nonNull)
-                    .mapToInt(Movie::getId)
-                    .max()
-                    .orElse(0);
-
-            try {
-                common.Generatic.setId(maxId + 1);
-            } catch (Exception e) {
-                logger.warn("Не удалось установить Generatic.setId: " + e.getMessage());
-            }
-            collectionManager.sortByLength();
-            logger.info("Коллекция загружена. Размер: " + collectionManager.getMovie().size());
-        }
-
-        private static void saveCollection() {
-            try {
-                fileManager.writeCSV(filename);
-                logger.info("Коллекция сохранена в файл: " + filename + " (фильмов: " + collectionManager.getMovie().size() + ")");
-            } catch (Exception e) {
-                logger.error("Ошибка при сохранении коллекции: " + e.getMessage());
-            }
-        }
-
         private static void startConsoleHandler() {
             new Thread(() -> {
                 Scanner scanner = new Scanner(System.in);
@@ -94,13 +71,8 @@ public class Server {
                     while (running) {
                         String input = scanner.nextLine().trim();
 
-                        if (input.equalsIgnoreCase("save")) {
-                            logger.info("Экстренное сохранение коллекции");
-                            saveCollection();
-
-                        } else if (input.equalsIgnoreCase("exit")) {
+                        if (input.equalsIgnoreCase("exit")) {
                             logger.info("Завершение работы сервера...");
-                            saveCollection();
                             running = false;
                             if (connectModule != null) {
                                 connectModule.stop();
@@ -109,21 +81,15 @@ public class Server {
 
                         } else if (input.equalsIgnoreCase("help")) {
                             logger.info("Доступные команды сервера:");
-                            logger.info("  save - сохранить коллекцию в CSV файл");
                             logger.info("  exit - завершить работу сервера");
                             logger.info("  help - показать эту справку");
                         }
                     }
                 } catch (NoSuchElementException e) {
                     logger.info("Консольный ввод завершён");
-                    saveCollection();
                     System.exit(0);
                 }
             }).start();
-        }
-
-        public static String getFilename() {
-            return filename;
         }
 
         public static CollectionManager getCollectionManager() {

@@ -5,9 +5,9 @@ import common.CommandPacket;
 
 public class Reorder implements Comand {
     @Override
-    public CommandPacket implementCommand(String[] args) {
+    public CommandPacket implementCommand(String[] args, String login, String pw) {
 
-        return new CommandPacket("reorder", null, null);
+        return new CommandPacket("reorder", null, null, login, pw);
     }
 
     @Override

@@ -20,6 +20,6 @@ public interface Comand {
      *         требующим особого внимания (например, ошибка скрипта или успех очистки);
      *         {@code false} в обычных случаях выполнения.
      */
-    CommandPacket implementCommand(String[] args);
+    CommandPacket implementCommand(String[] args, String log, String pw);
 
 }

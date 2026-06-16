@@ -6,6 +6,7 @@ import common.ResponsPacket;
 import server.Server;
 import server.interfcs.Comands;
 
+import java.util.List;
 import java.util.Stack;
 
 public class CountLessOscar implements Comands {
@@ -13,19 +14,28 @@ public class CountLessOscar implements Comands {
     @Override
     public ResponsPacket executer(CommandPacket commandPacket) {
         String[] args = commandPacket.getArgs();
-            long targetOscarsCount;
+        if (args == null || args.length == 0){
+            return new ResponsPacket("Ошибка: Не передан аргумент oscarsCount.", null);
+        }
+        long targetOscarsCount;
+        try {
             targetOscarsCount = Long.parseLong(args[0]);
-            Stack<Movie> movieStack = Server.getCollectionManager().getMovie();
+        }catch (NumberFormatException e){
+            return new ResponsPacket("Ошибка: Значение oscarsCount должно быть long.", null);
+        }
+        List<Movie> movieStack = Server.getCollectionManager().getMovie();
+        long count = 0;
+        synchronized (movieStack) {
             if (movieStack.isEmpty()) {
-                return  new ResponsPacket("Коллекция пуста. Количество элементов: 0\n", null);
+                return new ResponsPacket("Коллекция пуста. Количество элементов: 0\n", null);
             }
 
-            long count = 0;
             for (Movie movie : movieStack) {
                 if (movie.getOscarsCount() < targetOscarsCount) {
                     count++;
                 }
             }
+        }
 
             return new ResponsPacket("Количество фильмов с количеством Оскаров меньше " + targetOscarsCount + ": " + count + "\n", null);
 
@@ -34,6 +44,6 @@ public class CountLessOscar implements Comands {
 
     @Override
     public String toString() {
-        return "Выводит количество элементов, значение поля oscarsCount которых меньше заданного";
+        return "count_oscar: Выводит количество элементов, значение поля oscarsCount которых меньше заданного";
     }
 }

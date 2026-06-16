@@ -1,86 +1,55 @@
 package client.managers;
 
 import client.Client;
-import java.io.*;
+
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Stack;
 
 /**
- * Класс для управления потоками ввода и вывода (консоль и файлы).
- * Реализует логику переключения между интерактивным режимом и чтением скриптов,
- * а также предотвращает бесконечную рекурсию при вызове файлов.
- *
+ * Управляет вводом-выводом.
+ * Поддерживает два режима: чтение с консоли (по умолчанию) и чтение из файла (скрипты).
+ * Также отвечает за вывод сообщений пользователю и отслеживание ошибок при выполнении скриптов.
  * @author Алиса
- * @version 1.0
  */
+
 public class InputOutputManage {
-
-    /** Сканнер для чтения данных из стандартного потока ввода (консоли) */
-    private Scanner scan;
-
-    /** Текущий буферизированный поток для чтения из файла */
-    private BufferedReader fileScan;
-
-    /** Флаг, указывающий, происходит ли чтение из файла в данный момент */
+    Scanner scan;
+    Scanner fileScan;
     private boolean readFromFile;
-
-    /** Флаг наличия ошибки при исполнении скрипта */
     private boolean scriptHasError;
+    private List<String> openedFiles = new ArrayList<>();
+    private Stack<Scanner> scannerStack = new Stack<>();
+    private Stack<Boolean> fileReadingStack = new Stack<>();
 
-    /** Список путей к файлам, открытым в данный момент (для контроля рекурсии) */
-    private final List<String> openedFiles = new ArrayList<>();
-
-    /** Стек для хранения потоков чтения при вложенных вызовах скриптов */
-    private final Stack<BufferedReader> readerStack = new Stack<>();
-
-    /** Стек имен файлов для корректного управления историей открытых ресурсов */
-    private final Stack<String> fileNameStack = new Stack<>();
-
-    /**
-     * Инициализирует менеджер ввода-вывода.
-     * Устанавливает стандартный сканнер и сбрасывает флаги чтения файлов.
-     */
-    public InputOutputManage() {
+    public InputOutputManage(){
         scan = new Scanner(System.in);
         readFromFile = false;
         scriptHasError = false;
     }
-
-    /**
-     * Выводит строку в стандартный поток вывода.
-     *
-     * @param line текст для вывода
-     */
-    public void write(String line) {
+    public void write(String line){
         System.out.println(line);
     }
 
     /**
-     * Считывает следующую строку данных.
-     * Если активирован режим чтения из файла, берет строку из {@link #fileScan}.
-     * При достижении конца файла автоматически возвращается к предыдущему ридеру или консоли.
-     *
-     * @return считанная строка или пустая строка при завершении работы (Ctrl+D)
+     * Считывает одну строку ввода.
+     * Источник ввода зависит от режима: консоль или файл
+     * @return считанная строка
      */
-    public String read() {
+    public String read(){
         if (readFromFile) {
-            try {
-                String line = fileScan.readLine();
-                if (line != null) {
-                    return line;
-                } else {
-                    write("Файл скрипта закончился. Возврат назад.");
-                    stopFileReading("");
-                    return read();
-                }
-            } catch (IOException e) {
-                write("Ошибка чтения файла: " + e.getMessage());
+            if (fileScan.hasNextLine()) {
+                return fileScan.nextLine();
+            } else {
+                write("Файл скрипта закончился. Возврат в консоль.");
                 stopFileReading("");
-                return read();
+                return "";
             }
-        } else {
+        }
+        else {
             if (scan.hasNextLine()) {
                 return scan.nextLine();
             } else {
@@ -91,106 +60,94 @@ public class InputOutputManage {
         }
     }
 
-    /**
-     * Инициирует процесс чтения команд из указанного файла.
-     * Проверяет файл на наличие циклической рекурсии. Если файл уже открыт выше по стеку,
-     * устанавливает флаг ошибки и прерывает операцию.
-     *
-     * @param filename путь к файлу со скриптом
+    /** Переключает режим ввода на чтение из указанного файла.
+     * Если файл не найден, выводит сообщение об ошибке и остаётся в режиме консоли
+     * @param filename имя файла для чтения (путь к файлу)
      */
+
     public void startFileReading(String filename) {
         if (openedFiles.contains(filename)) {
             write("Ошибка: рекурсивный вызов скрипта! Файл " + filename + " уже открыт.");
             write("Стек открытых файлов: " + openedFiles);
             scriptHasError = true;
+            readFromFile = false;
+            stopFileReading(filename);
             return;
         }
-
         try {
-            FileInputStream fis = new FileInputStream(filename);
-            InputStreamReader isr = new InputStreamReader(fis);
-            BufferedReader newReader = new BufferedReader(isr);
+            Scanner newScan = new Scanner(new File(filename));
+            scannerStack.push(fileScan);
+            fileReadingStack.push(readFromFile);
 
-            if (readFromFile && fileScan != null) {
-                readerStack.push(fileScan);
-            }
-
-            fileScan = newReader;
+            fileScan = newScan;
             openedFiles.add(filename);
-            fileNameStack.push(filename);
-
             readFromFile = true;
             scriptHasError = false;
-
         } catch (FileNotFoundException e) {
             write("Файл не найден: " + filename);
+            openedFiles.clear();
+            readFromFile = false;
         }
     }
 
     /**
-     * Завершает чтение текущего файла и восстанавливает предыдущее состояние ввода.
-     *
-     * @param filename имя закрываемого файла (может быть пустым при автоматическом закрытии)
+     * Завершает режим чтения из файла.
      */
+
     public void stopFileReading(String filename) {
-        try {
-            if (fileScan != null) {
-                fileScan.close();
-                fileScan = null;
-            }
-        } catch (IOException e) {
-            write("Ошибка при закрытии файла.");
+        if (fileScan != null) {
+            fileScan.close();
         }
+        openedFiles.remove(filename);
 
-        if (!fileNameStack.isEmpty()) {
-            openedFiles.remove(fileNameStack.pop());
-        } else if (!filename.isEmpty()) {
-            openedFiles.remove(filename);
-        }
-
-        if (!readerStack.isEmpty()) {
-            fileScan = readerStack.pop();
-            readFromFile = true;
+        if (!scannerStack.isEmpty()) {
+            fileScan = scannerStack.pop();
+            readFromFile = fileReadingStack.pop();
+            scannerStack.clear();
         } else {
             fileScan = null;
             readFromFile = false;
-            scriptHasError = false;
-        }
-    }
-
-    /** @return {@code true}, если есть данные для чтения (в файле или консоли) */
-    public boolean hasNextLine() {
-        if (readFromFile) {
-            if (fileScan == null) return false;
-            try {
-                fileScan.mark(1);
-                int nextChar = fileScan.read();
-                fileScan.reset();
-                return nextChar != -1;
-            } catch (IOException e) {
-                return false;
+            if (!openedFiles.isEmpty()) {
+                openedFiles.clear();
             }
         }
-        return scan.hasNextLine();
+    }
+    /**
+     * Проверяет, есть ли ещё строки для чтения в текущем источнике.
+     * В режиме файла проверяет, остались ли непрочитанные строки.
+     * @return true, если есть следующая строка, иначе false
+     */
+
+    public boolean hasNextLine() {
+        if (readFromFile) {
+            return fileScan.hasNextLine();
+        }
+        return true;
     }
 
-    /** @param error состояние ошибки скрипта для установки */
+    /**
+     * Устанавливает флаг ошибки выполнения скрипта
+     * Используется для сигнализации о том, что в процессе выполнения скрипта произошла ошибка
+     * @param error true, если ошибка произошла, иначе false
+     */
+
     public void setScriptError(boolean error) {
         scriptHasError = error;
     }
 
-    /** @return {@code true}, если в процессе выполнения текущего скрипта возникла ошибка */
     public boolean isScriptHasError() {
         return scriptHasError;
     }
 
-    /** Закрывает основной сканнер консоли. */
-    public void closeScan() {
+    public void closeScan(){
         scan.close();
     }
 
-    /** @return {@code true}, если текущий источник данных — файл */
     public boolean isReadingFromFile() {
         return readFromFile;
+    }
+
+    public List<String> getOpenedFiles() {
+        return openedFiles;
     }
 }

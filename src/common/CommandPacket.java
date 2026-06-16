@@ -6,10 +6,14 @@ public class CommandPacket implements Serializable {
     private String type;
     private String[] args;
     private Movie movie;
-    public CommandPacket(String type, String[] args, Movie movie){
+    private String log;
+    private String password;
+    public CommandPacket(String type, String[] args, Movie movie, String log, String password){
         this.args = args;
         this.movie = movie;
         this.type = type;
+        this.log = log;
+        this.password = password;
     }
 
     public String getType(){return type;}
@@ -20,6 +24,13 @@ public class CommandPacket implements Serializable {
 
     public Movie getMovie() {
         return movie;
+    }
+    public String getPassword() {
+        return password;
+    }
+
+    public String getLog() {
+        return log;
     }
     @Override
     public String toString() {
